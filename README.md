@@ -82,6 +82,7 @@ The tool has been tested on PDFs containing:
 - [ ] Handle **bold/large fonts** more precisely
 - [ ] Use **Sessions** and **Timeouts** for concurrent users
 - [ ] Add better **language detection**
+- [ ] Add better **Preserver Colours**
 - [ ] Support **OCR and Table recognition** with PaddleOCR / UniLM DiT
 - [ ] Enable **multithreading** or **batch translation** to speed up processing
 
