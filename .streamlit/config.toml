@@ -1,0 +1,7 @@
+[server]
+headless = true
+address = "192.168.31.99"
+port = 8501
+
+[theme]
+base = "dark"

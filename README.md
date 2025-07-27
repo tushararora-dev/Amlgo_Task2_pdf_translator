@@ -1,0 +1,1 @@
+conda create --name pdftrans python=3.10 
