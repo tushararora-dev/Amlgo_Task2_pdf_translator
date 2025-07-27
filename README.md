@@ -9,7 +9,7 @@ Explanation: https://raw.githubusercontent.com/tushararora-dev/Amlgo_Task2_pdf_t
 
 Appraoch PDF : https://github.com/tushararora-dev/Amlgo_Task2_pdf_translator/blob/main/Report.pdf
 
-Video Explanation: na
+Video Explanation: https://youtu.be/E5rnNF_R-M4
 
 ![alt text](UI.png)
 
