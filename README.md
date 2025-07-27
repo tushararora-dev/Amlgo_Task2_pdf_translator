@@ -4,6 +4,8 @@ This is a Streamlit-based web application that allows you to **translate PDF doc
 
 
 Working URL: https://amlgolabs-task2-pdf-translator.streamlit.app
+Explanation: Explanation.md
+Appraoch PDF : Report.pdf
 
 ![alt text](UI.png)
 
