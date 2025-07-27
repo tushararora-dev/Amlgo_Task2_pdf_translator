@@ -1,6 +1,10 @@
 # 📄 PDF Translator (Hindi ↔ English)
 
 This is a Streamlit-based web application that allows you to **translate PDF documents** between **Hindi and English**. The app supports intelligent text filtering, layout preservation, and a fallback mode for generating clean translated PDFs.
+
+
+Working URL: https://amlgolabs-task2-pdf-translator.streamlit.app
+
 ![alt text](UI.png)
 
 ## 🚀 Features
@@ -29,3 +33,73 @@ This is a Streamlit-based web application that allows you to **translate PDF doc
 
 ---
 
+## 📁 Project Structure
+![alt text](Task2_Folder_Structure.png)
+
+---
+
+## 🔁 Pipeline Flow
+
+1. Upload PDF
+2. Extract text blocks (with formatting preserved)
+3. Skip non-translatable items (e.g., NASA, AI)
+4. Translate content (Hindi ↔ English)
+5. Rebuild PDF with original layout + translated text
+6. Download the final output
+
+---
+
+## 🧪 PDF Test Cases
+
+The tool has been tested on PDFs containing:
+- 🖍️ Highlighted text
+- 🖼️ Images
+- 🎨 Colored fonts
+- 🔗 Links
+- 🔡 Abbreviations (AI, ML, NASA)
+- 📄 Multi-page documents
+- 🔤 Mixed language (Hindi + English)
+
+---
+
+---
+
+## 🔧 Improvements & TODOs
+
+- [ ] Handle **multiple PDFs** (Batch translations)
+- [ ] Use **Classes and OOP** structure
+- [ ] Add **logging** and **exception handling**
+- [ ] Add **database** to store PDFs and stats
+- [ ] Improve UI (statistics, filtering, etc.)
+- [ ] Add **DevOps** practices for CI/CD
+- [ ] Build a **simple offline version** (no APIs/libraries)
+- [ ] Handle **bold/large fonts** more precisely
+- [ ] Use **Sessions** and **Timeouts** for concurrent users
+- [ ] Add better **language detection**
+- [ ] Support **OCR and Table recognition** with PaddleOCR / UniLM DiT
+- [ ] Enable **multithreading** or **batch translation** to speed up processing
+
+---
+
+## 🧠 Advanced Functionality
+
+✅ **No API Key Needed**  
+Used `Deep Translator` which allows unlimited usage of Google, Microsoft, or Libre Translate.
+
+✅ **Custom Translator Possible**  
+Optionally, a custom translation model (Transformer-based) can be trained and used instead of prebuilt models or APIs.
+
+---
+
+## ⚙️ How to Run Locally
+
+```bash
+# Step 1: Create environment
+conda create --name pdftrans python=3.10
+conda activate pdftrans
+
+# Step 2: Install dependencies
+pip install -r requirements.txt
+
+# Step 3: Launch the app
+streamlit run app.py
