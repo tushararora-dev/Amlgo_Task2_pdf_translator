@@ -64,6 +64,7 @@ def add_simple_text_blocks(page, texts: List[str]):
             page.insert_text((50, y_position), line, fontsize=DEFAULT_FONT_SIZE)
             y_position += line_height
 
+# main margin or width of text
 def wrap_text(text: str, max_width: float) -> List[str]:
     words = text.split()
     lines = []
@@ -97,6 +98,8 @@ def get_text_color(color_int: int) -> Tuple[float, float, float]:
     b = color_int & 255
     return (r / 255, g / 255, b / 255)
 
+
+# preserving the original PDF's page size
 def create_simple_translated_pdf(translated_text: str, original_bytes: bytes = None) -> bytes:
     doc = fitz.open()
     if original_bytes:
