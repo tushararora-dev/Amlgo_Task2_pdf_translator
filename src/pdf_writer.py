@@ -21,10 +21,7 @@ def create_translated_pdf(original_bytes: bytes, text_blocks: List[Dict], transl
         page = doc[page_num]
         for block, translated_text in page_blocks:
             if translated_text.strip():
-                x0, y0, x1, y1 = block['bbox']
-                # Expand vertical height slightly
-                y1 = y1 + 10  # increase 6 points or more
-                bbox = (x0, y0, x1, y1)
+                bbox = block['bbox']
                 page.draw_rect(bbox, color=None, fill=WHITE, oc=ocg)
                 page.insert_htmlbox(
                     bbox,
@@ -67,7 +64,6 @@ def add_simple_text_blocks(page, texts: List[str]):
             page.insert_text((50, y_position), line, fontsize=DEFAULT_FONT_SIZE)
             y_position += line_height
 
-# main margin or width of text
 def wrap_text(text: str, max_width: float) -> List[str]:
     words = text.split()
     lines = []
@@ -101,8 +97,6 @@ def get_text_color(color_int: int) -> Tuple[float, float, float]:
     b = color_int & 255
     return (r / 255, g / 255, b / 255)
 
-
-# preserving the original PDF's page size
 def create_simple_translated_pdf(translated_text: str, original_bytes: bytes = None) -> bytes:
     doc = fitz.open()
     if original_bytes:
