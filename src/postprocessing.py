@@ -7,7 +7,7 @@ ABBREVIATIONS = {'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'J
 
 def should_skip_translation(text: str) -> bool:
     text = text.strip()
-    if len(text) < 2:
+    if len(text) < 2 and text.lower() != 'a':  # Allow 'a' to be translated
         return True
 
     # Remove trailing punctuation for abbreviation check
@@ -24,6 +24,7 @@ def should_skip_translation(text: str) -> bool:
     if re.fullmatch(r'v?\d+(\.\d+)*([a-zA-Z]+\d*)?', text):  # versions like 1.0.2a
         return True
     return False
+
 
 def preprocess_text(text: str) -> List[Tuple[str, bool]]:
     words = re.findall(r'\S+|\s+', text)

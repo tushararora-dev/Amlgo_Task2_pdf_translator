@@ -1,8 +1,10 @@
 from deep_translator import GoogleTranslator
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import time
 from .postprocessing import preprocess_text, postprocess_translated_text
 from .config import LANGUAGES
+import re
+from .postprocessing import ABBREVIATIONS
 
 translator_cache = {}
 
@@ -26,9 +28,22 @@ def translate_text_segment(text: str, source: str, target: str, max_retries: int
 def translate_text(text: str, source: str, target: str) -> str:
     if not text or not text.strip() or source == target:
         return text
-    # Skip intelligent segmentation, translate full text
-    translated = translate_text_segment(text, source, target)
-    return translated
+
+    # Step 1: Mask abbreviations
+    masked_text, replacements = mask_abbreviations(text)
+
+    # Step 2: Translate the full sentence
+    translator = get_translator(source, target)
+    translated = translator.translate(masked_text.strip())
+
+    # Step 3: Unmask abbreviations
+    translated = unmask_abbreviations(translated, replacements)
+
+    return postprocess_translated_text(text, translated)
+
+
+
+
 
 def translate_text_blocks(text_blocks: List[str], source: str, target: str, callback=None) -> List[str]:
     if not text_blocks:
@@ -70,3 +85,22 @@ def detect_language(text: str) -> Optional[str]:
     elif latin_chars > 0:
         return 'en'
     return None
+
+# ABBREVIATIONS = {'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'JSON', 'HTTP', 'HTTPS',
+#                  'NASA', 'FBI', 'CEO', 'CTO', 'PhD', 'MBA', 'USA', 'UK', 'UAE', 'CPU', 'GPU'}
+def mask_abbreviations(text: str) -> Tuple[str, dict]:
+    replacements = {}
+    for abbr in ABBREVIATIONS:
+        pattern = r'\b' + re.escape(abbr) + r'\b'
+        token = f"__{abbr}__"
+        if re.search(pattern, text):
+            text = re.sub(pattern, token, text)
+            replacements[token] = abbr
+    return text, replacements
+
+def unmask_abbreviations(text: str, replacements: dict) -> str:
+    for token, abbr in replacements.items():
+        # Use regex to replace any case variation like __pdf__, __Pdf__, __PDF__
+        pattern = re.compile(re.escape(token), re.IGNORECASE)
+        text = pattern.sub(abbr, text)
+    return text
