@@ -35,12 +35,28 @@ def translate_text_blocks(text_blocks: List[str], source: str, target: str, call
         return []
     translated = []
     total = len(text_blocks)
+
     for i, block in enumerate(text_blocks):
         if callback:
             callback((i + 1) / total, f"Translating block {i + 1} of {total}")
-        translated.append(translate_text(block, source, target))
+
+        segments = preprocess_text(block)
+        translated_segments = []
+
+        for segment, should_translate in segments:
+            if should_translate:
+                translated_seg = translate_text_segment(segment, source, target)
+            else:
+                translated_seg = segment  # Leave it as-is
+            translated_segments.append(translated_seg)
+
+        # Join the segments together
+        translated_text = ''.join(translated_segments)
+        translated.append(translated_text)
+
         if i < total - 1:
             time.sleep(0.1)
+
     return translated
 
 def detect_language(text: str) -> Optional[str]:
