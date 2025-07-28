@@ -26,16 +26,9 @@ def translate_text_segment(text: str, source: str, target: str, max_retries: int
 def translate_text(text: str, source: str, target: str) -> str:
     if not text or not text.strip() or source == target:
         return text
-    segments = preprocess_text(text)
-    if not segments:
-        return text
-    result = []
-    for segment, should_translate in segments:
-        if should_translate and segment.strip():
-            result.append(translate_text_segment(segment, source, target))
-        else:
-            result.append(segment)
-    return ''.join(result)
+    # Skip intelligent segmentation, translate full text
+    translated = translate_text_segment(text, source, target)
+    return translated
 
 def translate_text_blocks(text_blocks: List[str], source: str, target: str, callback=None) -> List[str]:
     if not text_blocks:
