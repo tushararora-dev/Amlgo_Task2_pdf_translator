@@ -18,6 +18,7 @@ from src.postprocessing import preprocess_text
 def render_sidebar():
     with st.sidebar:
         st.header("ℹ️ About")
+        st.write("✅ Latest version deployed successfully!")
         st.markdown("""
         This app translates PDF content between Hindi and English.
         - ✅ Smart text filtering
