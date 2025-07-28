@@ -21,7 +21,10 @@ def create_translated_pdf(original_bytes: bytes, text_blocks: List[Dict], transl
         page = doc[page_num]
         for block, translated_text in page_blocks:
             if translated_text.strip():
-                bbox = block['bbox']
+                x0, y0, x1, y1 = block['bbox']
+                # Expand vertical height slightly
+                y1 = y1 + 10  # increase 6 points or more
+                bbox = (x0, y0, x1, y1)
                 page.draw_rect(bbox, color=None, fill=WHITE, oc=ocg)
                 page.insert_htmlbox(
                     bbox,
