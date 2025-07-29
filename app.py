@@ -95,7 +95,8 @@ def run_translation(uploaded_file, source_lang, target_lang):
             st.error("No text blocks found. May be image-only.")
             return None
 
-        texts = [b['text'] for b in blocks]
+        # Extract and flatten text (remove line breaks)
+        texts = [b['text'].replace('\n', ' ') for b in blocks]
 
         def callback(p, msg):  # Progress updater
             progress.progress(0.3 + p * 0.5)
@@ -103,6 +104,7 @@ def run_translation(uploaded_file, source_lang, target_lang):
 
         status.text("🔄 Translating...")
         translated = translate_text_blocks(texts, source_lang, target_lang, callback)
+
 
         progress.progress(0.85)
         status.text("📄 Generating PDF...")

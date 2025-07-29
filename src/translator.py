@@ -1,17 +1,32 @@
 import re
 import time
+import requests
+import os
 from typing import List, Optional, Tuple
-from deep_translator import GoogleTranslator
-from .postprocessing import preprocess_text, postprocess_translated_text, ABBREVIATIONS, apply_modern_fixes
+from dotenv import load_dotenv
+from .postprocessing import (
+    preprocess_text,
+    postprocess_translated_text,
+    ABBREVIATIONS,
+    apply_modern_fixes
+)
 
+# Load environment variables
+load_dotenv()
+HF_API_TOKEN = os.getenv("HF_API_TOKEN")
+API_URL = "https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-en-hi"
+HEADERS = {"Authorization": f"Bearer {HF_API_TOKEN}"}
 
 
 def translate_text_via_api(text: str) -> str:
-    """
-    Uses GoogleTranslator from deep_translator to translate text from English to Hindi.
-    """
     try:
-        return GoogleTranslator(source='en', target='hi').translate(text)
+        payload = {"inputs": text}
+        response = requests.post(API_URL, headers=HEADERS, json=payload)
+        if response.status_code == 200:
+            return response.json()[0]['translation_text']
+        else:
+            print("Translation API error:", response.status_code, response.text)
+            return text
     except Exception as e:
         print("Translation error:", e)
         return text
@@ -42,9 +57,8 @@ def translate_text(text: str, source: str, target: str) -> str:
     masked_text, replacements = mask_abbreviations(text)
     translated = translate_text_via_api(masked_text.strip())
     translated = unmask_abbreviations(translated, replacements)
-    translated = apply_modern_fixes(translated)  # ✅ Modern replacements
+    translated = apply_modern_fixes(translated)
     return postprocess_translated_text(text, translated)
-
 
 
 def translate_text_blocks(text_blocks: List[str], source: str, target: str, callback=None) -> List[str]:
@@ -78,9 +92,6 @@ def translate_text_blocks(text_blocks: List[str], source: str, target: str, call
 
 
 def detect_language(text: str) -> Optional[str]:
-    """
-    Simple heuristic-based language detection: checks whether majority of characters are Devanagari (Hindi) or Latin.
-    """
     sample = text[:500].strip()
     if not sample:
         return None

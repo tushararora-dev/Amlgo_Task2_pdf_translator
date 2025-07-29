@@ -1,19 +1,15 @@
 import re
+import json
 from typing import List, Tuple
 
-# Common abbreviations and patterns to skip
-ABBREVIATIONS = {'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'JSON', 'HTTP', 'HTTPS',
-                 'NASA', 'FBI', 'CEO', 'CTO', 'PhD', 'MBA', 'USA', 'UK', 'UAE', 'CPU', 'GPU'}
+# Path to modern replacements JSON
+MODERN_REPLACEMENTS_PATH = "src\modern_replacements.json"
 
-MODERN_REPLACEMENTS = {
-    "नमूना": "सैंपल",
-    "आवेदन": "एप्लिकेशन",
-    "उपयोगकर्ता मैनुअल": "उपयोगकर्ता पुस्तिका",
-    "इंस्टॉलेशन": "स्थापना",
-    "शुरू करने के लिए": "आरंभ करने के लिए",
-    "कदमों": "चरणों",
-    "मार्गदर्शन करेगा": "मार्गदर्शन करेगी",
-    "प्रभावी रूप से": "प्रभावी ढंग से"
+# Abbreviations to preserve during translation
+ABBREVIATIONS = {
+    'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'JSON',
+    'HTTP', 'HTTPS', 'NASA', 'FBI', 'CEO', 'CTO', 'PhD', 'MBA', 'USA',
+    'UK', 'UAE', 'CPU', 'GPU','RAM'
 }
 
 def should_skip_translation(text: str) -> bool:
@@ -68,7 +64,18 @@ def postprocess_translated_text(original: str, translated: str) -> str:
     return ' ' * leading_spaces + translated.strip() + ' ' * trailing_spaces
 
 
+# Load modern replacements from external JSON
+def load_modern_replacements() -> dict:
+    try:
+        with open(MODERN_REPLACEMENTS_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print("Could not load modern_replacements.json:", e)
+        return {}
+
+modern_replacements = load_modern_replacements()
+
 def apply_modern_fixes(text: str) -> str:
-    for wrong, right in MODERN_REPLACEMENTS.items():
+    for wrong, right in modern_replacements.items():
         text = text.replace(wrong, right)
     return text
