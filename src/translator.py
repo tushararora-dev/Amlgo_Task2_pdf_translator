@@ -1,53 +1,56 @@
-from deep_translator import GoogleTranslator
-from typing import List, Optional, Tuple
-import time
-from .postprocessing import preprocess_text, postprocess_translated_text
-from .config import LANGUAGES
 import re
-from .postprocessing import ABBREVIATIONS
+import time
+from typing import List, Optional, Tuple
+from deep_translator import GoogleTranslator
+from .postprocessing import preprocess_text, postprocess_translated_text, ABBREVIATIONS, apply_modern_fixes
 
-translator_cache = {}
 
-def get_translator(source: str, target: str) -> GoogleTranslator:
-    key = f"{source}_{target}"
-    if key not in translator_cache:
-        translator_cache[key] = GoogleTranslator(source=source, target=target)
-    return translator_cache[key]
 
-def translate_text_segment(text: str, source: str, target: str, max_retries: int = 3) -> str:
-    if not text.strip():
+def translate_text_via_api(text: str) -> str:
+    """
+    Uses GoogleTranslator from deep_translator to translate text from English to Hindi.
+    """
+    try:
+        return GoogleTranslator(source='en', target='hi').translate(text)
+    except Exception as e:
+        print("Translation error:", e)
         return text
-    translator = get_translator(source, target)
-    for _ in range(max_retries):
-        translated = translator.translate(text.strip())
-        if translated:
-            return postprocess_translated_text(text, translated)
-        time.sleep(1)
+
+
+def mask_abbreviations(text: str) -> Tuple[str, dict]:
+    replacements = {}
+    for abbr in ABBREVIATIONS:
+        pattern = r'\b' + re.escape(abbr) + r'\b'
+        token = f"__{abbr}__"
+        if re.search(pattern, text):
+            text = re.sub(pattern, token, text)
+            replacements[token] = abbr
+    return text, replacements
+
+
+def unmask_abbreviations(text: str, replacements: dict) -> str:
+    for token, abbr in replacements.items():
+        pattern = re.compile(re.escape(token), re.IGNORECASE)
+        text = pattern.sub(abbr, text)
     return text
+
 
 def translate_text(text: str, source: str, target: str) -> str:
     if not text or not text.strip() or source == target:
         return text
 
-    # Step 1: Mask abbreviations
     masked_text, replacements = mask_abbreviations(text)
-
-    # Step 2: Translate the full sentence
-    translator = get_translator(source, target)
-    translated = translator.translate(masked_text.strip())
-
-    # Step 3: Unmask abbreviations
+    translated = translate_text_via_api(masked_text.strip())
     translated = unmask_abbreviations(translated, replacements)
-
+    translated = apply_modern_fixes(translated)  # ✅ Modern replacements
     return postprocess_translated_text(text, translated)
-
-
 
 
 
 def translate_text_blocks(text_blocks: List[str], source: str, target: str, callback=None) -> List[str]:
     if not text_blocks:
         return []
+
     translated = []
     total = len(text_blocks)
 
@@ -60,12 +63,11 @@ def translate_text_blocks(text_blocks: List[str], source: str, target: str, call
 
         for segment, should_translate in segments:
             if should_translate:
-                translated_seg = translate_text_segment(segment, source, target)
+                translated_seg = translate_text(segment, source, target)
             else:
-                translated_seg = segment  # Leave it as-is
+                translated_seg = segment
             translated_segments.append(translated_seg)
 
-        # Join the segments together
         translated_text = ''.join(translated_segments)
         translated.append(translated_text)
 
@@ -74,33 +76,20 @@ def translate_text_blocks(text_blocks: List[str], source: str, target: str, call
 
     return translated
 
+
 def detect_language(text: str) -> Optional[str]:
+    """
+    Simple heuristic-based language detection: checks whether majority of characters are Devanagari (Hindi) or Latin.
+    """
     sample = text[:500].strip()
     if not sample:
         return None
+
     hindi_chars = sum(1 for char in sample if '\u0900' <= char <= '\u097F')
     latin_chars = sum(1 for char in sample if char.isalpha() and char.isascii())
+
     if hindi_chars > latin_chars:
         return 'hi'
     elif latin_chars > 0:
         return 'en'
     return None
-
-# ABBREVIATIONS = {'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'JSON', 'HTTP', 'HTTPS',
-#                  'NASA', 'FBI', 'CEO', 'CTO', 'PhD', 'MBA', 'USA', 'UK', 'UAE', 'CPU', 'GPU'}
-def mask_abbreviations(text: str) -> Tuple[str, dict]:
-    replacements = {}
-    for abbr in ABBREVIATIONS:
-        pattern = r'\b' + re.escape(abbr) + r'\b'
-        token = f"__{abbr}__"
-        if re.search(pattern, text):
-            text = re.sub(pattern, token, text)
-            replacements[token] = abbr
-    return text, replacements
-
-def unmask_abbreviations(text: str, replacements: dict) -> str:
-    for token, abbr in replacements.items():
-        # Use regex to replace any case variation like __pdf__, __Pdf__, __PDF__
-        pattern = re.compile(re.escape(token), re.IGNORECASE)
-        text = pattern.sub(abbr, text)
-    return text

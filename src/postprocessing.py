@@ -5,23 +5,33 @@ from typing import List, Tuple
 ABBREVIATIONS = {'AI', 'ML', 'API', 'URL', 'PDF', 'HTML', 'CSS', 'JS', 'SQL', 'JSON', 'HTTP', 'HTTPS',
                  'NASA', 'FBI', 'CEO', 'CTO', 'PhD', 'MBA', 'USA', 'UK', 'UAE', 'CPU', 'GPU'}
 
+MODERN_REPLACEMENTS = {
+    "नमूना": "सैंपल",
+    "आवेदन": "एप्लिकेशन",
+    "उपयोगकर्ता मैनुअल": "उपयोगकर्ता पुस्तिका",
+    "इंस्टॉलेशन": "स्थापना",
+    "शुरू करने के लिए": "आरंभ करने के लिए",
+    "कदमों": "चरणों",
+    "मार्गदर्शन करेगा": "मार्गदर्शन करेगी",
+    "प्रभावी रूप से": "प्रभावी ढंग से"
+}
+
 def should_skip_translation(text: str) -> bool:
     text = text.strip()
-    if len(text) < 2 and text.lower() != 'a':  # Allow 'a' to be translated
+    if len(text) < 2 and text.lower() != 'a':
         return True
 
-    # Remove trailing punctuation for abbreviation check
     clean = re.sub(r'[^\w]', '', text).upper()
     if clean in ABBREVIATIONS:
         return True
 
-    if re.fullmatch(r'^[\d\W_]+$', text):  # numbers, symbols, punctuation
+    if re.fullmatch(r'^[\d\W_]+$', text):
         return True
     if re.search(r'(http|www\.|@|\.com|\.pdf|\.png)', text.lower()):
         return True
-    if re.fullmatch(r'[A-Z0-9_\-\.]+', text):  # like FILE_NAME_123.PDF
+    if re.fullmatch(r'[A-Z0-9_\-\.]+', text):
         return True
-    if re.fullmatch(r'v?\d+(\.\d+)*([a-zA-Z]+\d*)?', text):  # versions like 1.0.2a
+    if re.fullmatch(r'v?\d+(\.\d+)*([a-zA-Z]+\d*)?', text):
         return True
     return False
 
@@ -51,8 +61,14 @@ def preprocess_text(text: str) -> List[Tuple[str, bool]]:
         segments.append((current, current_flag))
     return segments
 
+
 def postprocess_translated_text(original: str, translated: str) -> str:
     leading_spaces = len(original) - len(original.lstrip())
     trailing_spaces = len(original) - len(original.rstrip())
     return ' ' * leading_spaces + translated.strip() + ' ' * trailing_spaces
 
+
+def apply_modern_fixes(text: str) -> str:
+    for wrong, right in MODERN_REPLACEMENTS.items():
+        text = text.replace(wrong, right)
+    return text

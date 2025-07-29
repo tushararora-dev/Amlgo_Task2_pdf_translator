@@ -28,7 +28,7 @@ def render_sidebar():
         """)
 
         st.header("🧠 Test Filtering")
-        demo_text = st.text_input("Try intelligent filtering:", value="Amlgo Labs uses AI and ML.")
+        demo_text = st.text_input("Try intelligent filtering:", value="Welcome to the Sample Application! This user manual will guide you through the installation, setup, and usage of the application. Follow the steps below to get started quickly and effectively.")
         if demo_text:
             segments = preprocess_text(demo_text)
             for word, should_tx in segments:
