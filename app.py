@@ -9,33 +9,25 @@ from src.pdf_reader import (
     validate_pdf, get_pdf_info, has_extractable_text,
     extract_text_blocks
 )
-from src.translator import translate_text_blocks, translate_text
+from src.translator import translate_text, translate_text_blocks
+
 from src.pdf_writer import (
     create_translated_pdf, create_simple_translated_pdf
 )
-from src.postprocessing import preprocess_text
 
 def render_sidebar():
     with st.sidebar:
-        st.header("ℹ️ About")
-        st.write("✅ Latest version deployed successfully!")
-        st.markdown("""
-        This app translates PDF content between Hindi and English.
-        - ✅ Smart text filtering
-        - ✅ Layout preservation
-        - ✅ Free Google Translate via Deep Translator
-        - ✅ Multi-page PDFs Support
-        """)
+        st.header("🔄 Translation Tester")
 
         st.header("🧠 Test Filtering")
-        demo_text = st.text_input("Try intelligent filtering:", value="Welcome to the Sample Application! This user manual will guide you through the installation, setup, and usage of the application. Follow the steps below to get started quickly and effectively.")
+        demo_direction = st.selectbox("Direction", list(TRANSLATION_DIRECTIONS.keys()), index=1)  # Default: English to Hindi
+        source_demo, target_demo = TRANSLATION_DIRECTIONS[demo_direction]
+
+        demo_text = st.text_input("Try intelligent filtering:", value="You are free to use any open-source LLM model or translation API")
         if demo_text:
-            segments = preprocess_text(demo_text)
-            for word, should_tx in segments:
-                color = "🟢" if should_tx else "🔴"
-                st.write(f"{color} `{word}`")
-            translated = translate_text(demo_text, 'en', 'hi')
+            translated = translate_text(demo_text, source_demo, target_demo)
             st.markdown(f"**Translated Result:** {translated}")
+
 
 
 # Render MAIN FIle
@@ -73,7 +65,7 @@ def render_file_upload():
 
 def render_translation_direction():
     st.header("2️⃣ Select Translation Direction")
-    direction = st.selectbox("Direction:", list(TRANSLATION_DIRECTIONS.keys()))
+    direction = st.selectbox("Direction:", list(TRANSLATION_DIRECTIONS.keys()), index=1)
     source_lang, target_lang = TRANSLATION_DIRECTIONS[direction]
     col1, col2 = st.columns(2)
     col1.info(f"From: {direction.split(' to ')[0]}")
